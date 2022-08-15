@@ -1,0 +1,81 @@
+
+#spring:
+#  application:
+#    # 应用名称
+#    name: file-system
+#  profiles:
+#    # 环境配置
+#    active: dev
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 192.168.100.201:8848
+#        group: FILE
+#        namespace: 067ca389-222b-42a2-96f1-9c5b8d6e3f3f
+#      config:
+#        group: FILE
+#        name: application-dev
+#        namespace: 067ca389-222b-42a2-96f1-9c5b8d6e3f3f
+#        # 配置中心地址
+#        server-addr: 192.168.100.201:8848
+#        # 配置文件格式
+#        file-extension: yml
+
+server:
+  port: 8031
+
+spring:
+  redis:
+    host: 192.168.100.201
+    database: 0
+    port: 6379
+    password: 1234
+
+#  rabbitmq:
+#    host: 192.168.100.201
+#    port: 5672 # 这是rabbitMQ的端口号 ; 15672 ：这是那个RabbitMQ的web页面的端口号;
+#    username: admin
+#    password: admin
+#    # publisher-confirm-type: correlated  #开启confirm模式
+#    publisher-confirms: true  #  消息发送到交换机确认机制,是否确认回调
+#    publisher-returns: true
+  datasource:
+    name: api
+    url: jdbc:mysql://192.168.100.201:3306/file_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+prefixUrl: "http://192.168.100.201:9521/"
+nacos:
+  share: application-dev
+
+# Mybatis
+mybatis:
+  typeAliasesPackage: com.wh.file
+  mapperLocations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+fdfs:
+  so-timeout: 1501
+  connect-timeout: 601
+  thumb-image:
+    width: 150
+    height: 150
+  tracker-list:
+    - 192.168.100.201:22122
+fastdfs:
+  tracker_server: 192.168.100.201:22122
+  connect_timeout: 5
+  network_timeout: 30
+  charset: UTF-8
+  http:
+    secret_key: FastDFS1234567890
+    tracker_http_port: 9521
+    anti_steal:
+      check_token: no
+feign:
+  hystrix:
+    enabled: true

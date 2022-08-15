@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wh.file.mapper.FilesMapper">
+
+    <resultMap id="BaseResultMap" type="com.wh.file.domain.Files">
+        <result property="id" column="id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileType" column="file_type"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="fileUrl" column="file_url"/>
+        <result property="businessType" column="business_type"/>
+        <result property="isDelete" column="is_delete" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="Base_Sql">
+        select id, file_name, file_type, file_size, file_url, business_type, create_by, create_time from files
+    </sql>
+
+    <select id="getFileLists" parameterType="com.wh.file.domain.web.req.GetFilesReq" resultType="com.wh.file.domain.web.resp.FilesResp">
+        <include refid="Base_Sql"/>
+        <where>
+            business_type = #{businessType}
+            and is_delete = 0
+            and create_by = #{createBy}
+            <if test="fileName != null and  fileName != ''">and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="fileType != null and  fileType != ''">and file_type = #{fileType}</if>
+        </where>
+    </select>
+
+    <insert id="saveFiles" parameterType="com.wh.file.domain.web.req.FilesAddReq">
+        insert into files
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">file_name,</if>
+            <if test="fileType != null and fileType != ''">file_type,</if>
+            <if test="fileSize != null">file_size,</if>
+            <if test="fileUrl != null and fileUrl != ''">file_url,</if>
+            <if test="businessType != null">business_type,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="fileName != null and fileName != ''">#{fileName},</if>
+            <if test="fileType != null and fileType != ''">#{fileType},</if>
+            <if test="fileSize != null">#{fileSize},</if>
+            <if test="fileUrl != null and fileUrl != ''">#{fileUrl},</if>
+            <if test="businessType != null">#{businessType},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime!= null">#{createTime}</if>
+        </trim>
+    </insert>
+
+    <update id="delFiles">
+        update files
+        set is_delete = 1
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="recover">
+        update files
+        set is_delete = 1
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+
+    </update>
+
+    <delete id="delFile">
+        delete from files
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+        </where>
+    </delete>
+
+    <select id="getFileType" resultType="java.lang.String">
+        select file_type from files where id_delete = 0
+    </select>
+
+    <select id="getRecycleBinList" resultType="com.wh.file.domain.web.resp.FilesResp">
+        <include refid="Base_Sql"/>
+        <where>
+            business_type = #{businessType}
+            and is_delete = 1
+            and create_by = #{createBy}
+        </where>
+    </select>
+
+    <delete id="delData">
+        delete from files
+        where DATE_SUB(CURDATE(), INTERVAL 60 DAY) >= create_time
+        and is_delete = 1
+    </delete>
+</mapper>
